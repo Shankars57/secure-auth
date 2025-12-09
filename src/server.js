@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import fs from "fs/promises";
 import path from "path";
+import fetch from "node-fetch";
 import {
   ensureKeys,
   decryptSeedAndStore,
@@ -118,6 +119,45 @@ app.get("/req-seed", async (req, res) => {
     res.json(error.message);
   }
 });
+
+async function getEncryptedKey() {
+  try {
+    const payload = {
+      student_id: "22MH1A4204",
+      github_repo_url: "https://github.com/Shankars57/secure-auth",
+      public_key:
+        "-----BEGIN PUBLIC KEY-----MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAs4q63j2t2D+NQFFMP2iTLhzdVv7We8RDJO0hQFiLJSxKIy2eNPsCoEg/EH6Q2G3rzdWnKPyhhodo+P+fU+OaTite+3CSrimqSfGIO5RBZTaNymkFuFE2a+NhfSL4SZlsTVppPdCLuEDPSCRqvlTxOi2qVee8lr28D4nJExyXFrxH6l0iJ7Lw0D7lI3ehTmPzuEj0/+xVbeMNz1c0AYD+ouFNUTG/oYS/rcmyZCc5j7Ny+c6md2XFjtFipsqypgDo4r5w1om/fh9JXarr7V78hTOhWW8gMUYlkGbheF8BXoI5VSnCTVkZnA9FgHOl//+XWhst+sQucIVBXH41M4Wrn5M8vsPMBtbFZNE1amjQLgcWiulOjeVJhQABV0ouWLDU5jJllSCBYQfXwhyDEb8bY8kcT+ofSzj9QigNrzRvSkJ60rn1ycCdhkgMwaFrAgoaH7bSxkYN/l+luMbTlU7Uv1k5fI6SHhPoGY3AQZH/qSICeVNks0Pby+IBI2YYHGezOZ1qOBzZxVIFaRggMY9A7ZVEkr1Y3+ke9+F+wxG2c5YncaBSm469wiZ3S0x3Qqe5iltCUa6NsLCx5fWSzUKuxphHaauZMXuNeAYusntPX9hWGuUg3Xm3aYcvroOF4G53XZVReDoem5MXJluTjrBCm2XKYIgPxvOOg/ko24TuO7kCAwEAAQ==-----END PUBLIC KEY-----",
+    };
+
+    const resp = await fetch(
+      "https://eajeyq4r3zljoq4rpovy2nthda0vtjqf.lambda-url.ap-south-1.on.aws/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => "");
+      throw new Error(`HTTP ${resp.status} - ${text}`);
+    }
+
+    const encryptSeed = await resp.json();
+    await fs.writeFile(
+      path.join(DATA_DIR, "seed.txt"),
+      encryptSeed.encrypted_seed
+    );
+    return encryptSeed;
+  } catch (err) {
+    console.error("request failed:", err);
+    throw err;
+  }
+}
+
+getEncryptedKey();
 
 app.get("/", (req, res) => {
   res.write(`<h1>Hello there server is already running</h1>`);

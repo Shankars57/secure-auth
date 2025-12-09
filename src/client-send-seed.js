@@ -21,12 +21,17 @@ export function encryptWithPublicPem(publicPem, plaintext) {
   return enc.toString("base64");
 }
 
+
+
+
+
+
 export async function sendSeed(urlBase, doPost = true) {
   const seed = generateHex64Seed();
   const pub = await getServerPublicKey(urlBase);
   const encryptedB64 = encryptWithPublicPem(pub, seed);
   const body = { seed: encryptedB64 };
-  console.log("JSON body to send:", JSON.stringify(body));
+ // console.log("JSON body to send:", JSON.stringify(body));
   if (doPost) {
     const resp = await fetch(`${urlBase}/decrypt-seed`, {
       method: "POST",
