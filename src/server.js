@@ -111,7 +111,7 @@ app.post("/sign-commit", async (req, res) => {
 app.get("/req-seed", async (req, res) => {
   try {
     const baseUrl = `http://localhost:8080`;
-    const body = await sendSeed(baseUrl, true);
+    const body = await sendSeed(baseUrl, false);
     res.status(200).json({ body });
   } catch (error) {
     res.json(error.message);

@@ -23,10 +23,8 @@ function encryptWithPublicPem(publicPem, plaintext) {
 
 export async function sendSeed(urlBase, doPost = true) {
   const seed = generateHex64Seed();
-  console.log("generated seed (hex):", seed);
   const pub = await getServerPublicKey(urlBase);
   const encryptedB64 = encryptWithPublicPem(pub, seed);
-  console.log("encrypted base64:", encryptedB64);
   const body = { seed: encryptedB64 };
   console.log("JSON body to send:", JSON.stringify(body));
   if (doPost) {
@@ -36,8 +34,6 @@ export async function sendSeed(urlBase, doPost = true) {
       body: JSON.stringify(body),
     });
     const data = await resp.json().catch(() => ({ status: resp.status }));
-    console.log("server response:", data);
-
     return data;
   }
   return body;
