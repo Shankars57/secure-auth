@@ -47,6 +47,7 @@ docker run --rm -p 8080:8080 -v $(pwd)/data:/data -v $(pwd)/cron:/cron secure-au
 ## Endpoints
 
 - GET /public-key
+- GET /req-seed 
 - POST /decrypt-seed { "seed": "<base64>" }
 - GET /generate-2fa
 - POST /verify-2fa { "code": "123456" }

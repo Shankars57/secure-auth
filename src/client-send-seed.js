@@ -9,7 +9,7 @@ async function getServerPublicKey(urlBase) {
   return r.text();
 }
 
-function encryptWithPublicPem(publicPem, plaintext) {
+export function encryptWithPublicPem(publicPem, plaintext) {
   const enc = crypto.publicEncrypt(
     {
       key: publicPem,

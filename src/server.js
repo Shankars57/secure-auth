@@ -12,7 +12,8 @@ import {
 } from "./crypto-utils.js";
 
 import { generateOTP, verifyOTP } from "./totp.js";
-import { sendSeed } from "./client-send-seed.js";
+import { generateHex64Seed } from "./seed-utils.js";
+import { sendSeed, encryptWithPublicPem } from "./client-send-seed.js";
 dotenv.config();
 
 const app = express();
@@ -107,12 +108,12 @@ app.post("/sign-commit", async (req, res) => {
       .json({ error: "signing_failed", details: err.message });
   }
 });
-
 app.get("/req-seed", async (req, res) => {
   try {
-    const baseUrl = `http://localhost:8080`;
-    const body = await sendSeed(baseUrl, false);
-    res.status(200).json({ body });
+    const publicPemKey = await readPublicKey();
+    const genSeed = generateHex64Seed();
+    const seed = encryptWithPublicPem(publicPemKey, genSeed);
+    res.status(200).json({ seed });
   } catch (error) {
     res.json(error.message);
   }
