@@ -94,9 +94,13 @@ app.post("/sign-commit", async (req, res) => {
     }
     const sig = await signCommitHash(commitHash);
     const signature_b64 = sig.toString("base64");
-
+    await fs.writeFile(
+      path.join(DATA_DIR, "commit_sign.txt"),
+      signature_b64,
+      "utf8"
+    );
     if (instrPubPem && typeof instrPubPem === "string") {
-      const enc = await encryptWithPubPem(instrPubPem, sig);
+      const enc = encryptWithPubPem(instrPubPem, sig);
       return res.json({
         signature_b64,
         encrypted_signature_b64: enc.toString("base64"),
@@ -123,7 +127,7 @@ app.get("/req-seed", async (req, res) => {
   }
 });
 
-async function getEncryptedKey() {
+async function getEncryptedKey(stu_id ,github_repo_url , public_key) {
   const publicKey = await fs.readFile(PUBLIC_KEY_PATH, "utf8");
   const payload = {
     student_id: "22MH1A4204",
@@ -152,8 +156,6 @@ C4aaeHSjTrNfEIIyISBcQC8CAwEAAQ==
       body: JSON.stringify(payload),
     }
   );
- 
-  
 
   if (!resp.ok) {
     const text = await resp.text().catch(() => "");
