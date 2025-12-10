@@ -18,9 +18,12 @@ WORKDIR /app
 RUN apk add --no-cache bash tzdata busybox-suid
 
 COPY --from=builder /app /app
-COPY crontab /etc/crontabs/root
+COPY crontab /etc/crontab/node
 
-RUN mkdir -p /data /cron && chown -R node:node /data /cron && chmod 700 /data /cron
+
+RUN mkdir -p /data /cron \
+  && chown -R node:node /data /cron \
+  && chmod 700 /data /cron
 
 EXPOSE 8080
 USER node

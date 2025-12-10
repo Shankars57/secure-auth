@@ -1,0 +1,22 @@
+# 1. Decrypt seed
+curl -X POST http://localhost:8080/decrypt-seed \
+  -H "Content-Type: application/json" \
+  -d "{\"encrypted_seed\": \"$(cat encrypted_seed.txt)\"}"
+
+# 2. Generate 2FA code
+curl http://localhost:8080/generate-2fa
+
+# 3. Verify valid code
+CODE=$(curl -s http://localhost:8080/generate-2fa | jq -r '.code')
+curl -X POST http://localhost:8080/verify-2fa \
+  -H "Content-Type: application/json" \
+  -d "{\"code\": \"$CODE\"}"
+
+# 4. Verify invalid code
+curl -X POST http://localhost:8080/verify-2fa \
+  -H "Content-Type: application/json" \
+  -d '{"code": "000000"}'
+
+# 5. Check cron output (wait 70+ seconds)
+sleep 70
+docker exec <container-name> cat /cron/last_code.txt

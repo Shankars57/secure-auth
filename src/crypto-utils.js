@@ -13,28 +13,39 @@ export async function ensureKeys() {
     await fs.access(PRIVATE_KEY_PATH);
     await fs.access(PUBLIC_KEY_PATH);
     return;
-  } catch (err) {
+  } catch {
     const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
       modulusLength: 4096,
       publicExponent: 0x10001,
       publicKeyEncoding: { type: "spki", format: "pem" },
       privateKeyEncoding: { type: "pkcs8", format: "pem" },
     });
+
     await fs.mkdir(DATA_DIR, { recursive: true });
     await fs.writeFile(PRIVATE_KEY_PATH, privateKey, { mode: 0o600 });
     await fs.writeFile(PUBLIC_KEY_PATH, publicKey, { mode: 0o644 });
   }
 }
+
 export async function decryptSeedAndStore(base64Encrypted) {
   if (!base64Encrypted || typeof base64Encrypted !== "string") {
     throw new Error("decryption_failed: missing_or_invalid_seed");
   }
-  const priv = await fs.readFile(PRIVATE_KEY_PATH, "utf8");
+
+  let priv;
+  try {
+    priv = await fs.readFile(PRIVATE_KEY_PATH, "utf8");
+  } catch {
+    throw new Error("decryption_failed: private_key_unavailable");
+  }
+
   const cleanB64 = base64Encrypted.replace(/\s+/g, "");
   if (!/^[A-Za-z0-9+/]+={0,2}$/.test(cleanB64)) {
     throw new Error("decryption_failed: seed_not_valid_base64");
   }
+
   const encBuf = Buffer.from(cleanB64, "base64");
+
   let decrypted;
   try {
     decrypted = crypto.privateDecrypt(
@@ -50,11 +61,11 @@ export async function decryptSeedAndStore(base64Encrypted) {
   }
 
   let plain = decrypted.toString("utf8").trim();
+
   if (/^[0-9a-fA-F]{64}$/.test(plain)) {
     const buf = Buffer.from(plain, "hex");
     let b32 = base32.encode(buf).replace(/=+$/g, "");
-    b32 = b32.toUpperCase();
-    plain = b32;
+    plain = b32.toUpperCase();
   }
 
   await fs.writeFile(SEED_PATH, plain, { mode: 0o600 });
@@ -62,20 +73,25 @@ export async function decryptSeedAndStore(base64Encrypted) {
 }
 
 export async function signCommitHash(hashHex) {
-  if (!/^[0-9a-fA-F]+$/.test(hashHex)) throw new Error("invalid_commit_hash");
+  if (!/^[0-9a-fA-F]+$/.test(hashHex)) {
+    throw new Error("invalid_commit_hash");
+  }
+
   const priv = await fs.readFile(PRIVATE_KEY_PATH, "utf8");
   const buf = Buffer.from(hashHex, "hex");
+
   const signature = crypto.sign("sha256", buf, {
     key: priv,
     padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
     saltLength: crypto.constants.RSA_PSS_SALTLEN_MAX,
   });
+
   return signature;
 }
 
-export async function encryptWithPubPem(pubPem, bufferToEncrypt) {
+export function encryptWithPubPem(pubPem, bufferToEncrypt) {
   try {
-    const enc = crypto.publicEncrypt(
+    return crypto.publicEncrypt(
       {
         key: pubPem,
         padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
@@ -83,12 +99,11 @@ export async function encryptWithPubPem(pubPem, bufferToEncrypt) {
       },
       bufferToEncrypt
     );
-    return enc;
   } catch (err) {
     throw new Error("public_encrypt_failed: " + err.message);
   }
 }
 
 export async function readPublicKey() {
-  return (await fs.readFile(PUBLIC_KEY_PATH, "utf8")).toString();
+  return fs.readFile(PUBLIC_KEY_PATH, "utf8");
 }

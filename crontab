@@ -1,1 +1,3 @@
-* * * * * node /app/src/cron_runner.js >> /cron/cron.log 2>&1
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+* * * * * /usr/local/bin/node /app/src/cron_runner.js >> /cron/cron.log 2>&1
