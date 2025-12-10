@@ -28,24 +28,8 @@ export async function ensureKeys() {
 }
 
 export async function decryptSeedAndStore(base64Encrypted) {
-  if (!base64Encrypted || typeof base64Encrypted !== "string") {
-    throw new Error("decryption_failed: missing_or_invalid_seed");
-  }
-
-  let priv;
-  try {
-    priv = await fs.readFile(PRIVATE_KEY_PATH, "utf8");
-  } catch {
-    throw new Error("decryption_failed: private_key_unavailable");
-  }
-
-  const cleanB64 = base64Encrypted.replace(/\s+/g, "");
-  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(cleanB64)) {
-    throw new Error("decryption_failed: seed_not_valid_base64");
-  }
-
-  const encBuf = Buffer.from(cleanB64, "base64");
-
+  const priv = await fs.readFile(PRIVATE_KEY_PATH, "utf8");
+  const encBuf = Buffer.from(base64Encrypted, "base64");
   let decrypted;
   try {
     decrypted = crypto.privateDecrypt(
@@ -56,8 +40,8 @@ export async function decryptSeedAndStore(base64Encrypted) {
       },
       encBuf
     );
-  } catch (error) {
-    throw new Error("decryption_failed: " + error.message);
+  } catch (err) {
+    throw new Error("decryption_failed: " + err.message);
   }
 
   let plain = decrypted.toString("utf8").trim();
@@ -65,7 +49,8 @@ export async function decryptSeedAndStore(base64Encrypted) {
   if (/^[0-9a-fA-F]{64}$/.test(plain)) {
     const buf = Buffer.from(plain, "hex");
     let b32 = base32.encode(buf).replace(/=+$/g, "");
-    plain = b32.toUpperCase();
+    b32 = b32.toUpperCase();
+    plain = b32;
   }
 
   await fs.writeFile(SEED_PATH, plain, { mode: 0o600 });

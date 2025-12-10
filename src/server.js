@@ -11,6 +11,7 @@ import {
   encryptWithPubPem,
   DATA_DIR,
   PUBLIC_KEY_PATH,
+  PRIVATE_KEY_PATH,
 } from "./crypto-utils.js";
 import { generateOTP, verifyOTP } from "./totp.js";
 import { generateHex64Seed } from "./seed-utils.js";
@@ -127,7 +128,20 @@ async function getEncryptedKey() {
   const payload = {
     student_id: "22MH1A4204",
     github_repo_url: "https://github.com/Shankars57/secure-auth",
-    public_key: publicKey,
+    public_key: `-----BEGIN PUBLIC KEY-----
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAqFAokSnywT1c34lAVz5m
+vmaRHzyukGXQytBVNUJH4s2Gn/99PPlbdXo65IGu87drCIDjrFL9LvUj9ROEQIrS
+5+6s0K2+KAKQgRxznjcbJj1ppfWn2KHjo7huKm9AhnpxRAZbJkDwu87e3IeMkWYH
+Y9C2Y/Gv9Y+K7X5Gk01GMMAg2Nr8J9QxdmTHrm63EiBkXsjiyeEjDZ2YOy0OHgKF
+/GylhMXyXK0+aeo09WKCiKI6uSoR+nspws9TgtBJyajF4g17eQjJ1XLi+X+4Q2aB
+44uk6GB/dihDEjM1PEmpSr5kOWHpNTdjFgyvzZuCKdz1Oeb6OVWadZI1AjTJ/YX7
+4tmf2G3G7sQ23PTgNv9HGSWIwe8kjGpKF4jJ0aHc0NQDJjNFu7oIbctScnXd86cV
+Sy+JCwmCCPIocbde2UlOAvTxAJCX9ogYWtuA0F0MjZ3NL6ZUeHi/h4F5PgwY8C8v
+eh+GeBoxXQrcWFYBCrKCYN60plMb5HITu0PQuhcpzCcSOslfPF2LxFmI5UWNH4um
+C4YPyQDjkicWYhMzGLig/aFdLYkJxEK5ysf09+jArPWOblOamHnRZSvyTCcOn66E
+8fQzjSszqT44tP1gTYvvPfe1aFJmy2h2rdEqToeBHE/uGzCzrOv4onDSRWigcA/t
+C4aaeHSjTrNfEIIyISBcQC8CAwEAAQ==
+-----END PUBLIC KEY-----`,
   };
 
   const resp = await fetch(
@@ -138,6 +152,8 @@ async function getEncryptedKey() {
       body: JSON.stringify(payload),
     }
   );
+ 
+  
 
   if (!resp.ok) {
     const text = await resp.text().catch(() => "");

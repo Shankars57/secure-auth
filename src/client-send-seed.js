@@ -45,9 +45,8 @@ export async function sendSeed(urlBase, doPost = true) {
 }
 (async () => {
   try {
-    
     const urlBase =  "http://localhost:8080";
-    await sendSeed(urlBase, true);
+    //await sendSeed(urlBase, true);
   } catch (err) {
     console.error(err);
   }
