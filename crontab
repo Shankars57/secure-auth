@@ -1,4 +1,4 @@
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-* * * * * node /app/src/cron_runner.js >> /cron/cron.log 2>&1
+* * * * * node /src/cron_runner.js >> /cron/cron.log 2>&1
 
