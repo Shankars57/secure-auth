@@ -17,8 +17,12 @@ WORKDIR /app
 
 RUN apk add --no-cache bash tzdata busybox-suid
 
-COPY --from=builder /app /app
-COPY crontab /etc/crontab/node
+# copy cron file for ROOT
+COPY crontab /etc/crontabs/root
+RUN chmod 600 /etc/crontabs/root
+
+# switch user ONLY for node app
+CMD sh -c "/usr/sbin/crond -f -l 8 & su node -c 'node src/server.js'"
 
 
 RUN mkdir -p /data /cron \

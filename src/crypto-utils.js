@@ -68,7 +68,7 @@ export async function signCommitHash(hashHex) {
   const signature = crypto.sign("sha256", buf, {
     key: priv,
     padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
-    saltLength: crypto.constants.RSA_PSS_SALTLEN_MAX,
+    saltLength: 32,
   });
 
   return signature;

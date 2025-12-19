@@ -17,6 +17,8 @@ import { generateOTP, verifyOTP } from "./totp.js";
 import { generateHex64Seed } from "./seed-utils.js";
 import { encryptWithPublicPem } from "./client-send-seed.js";
 
+
+
 dotenv.config();
 
 const app = express();
